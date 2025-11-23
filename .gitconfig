@@ -7,7 +7,9 @@
         co = commit
         cm = commit -m
         p = push
+	pl = pull
         fuck = reset --hard
+	log = log --stat
         last = log -1 HEAD --stat
         count = rev-list --count
 [help]
