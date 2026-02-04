@@ -19,41 +19,82 @@ blue=$(tput setaf 27)
 
 HISTTIMEFORMAT="$blue%Y-%m-%d $blue%H:%M:%S $white"
 
-ec2list() {
-    local profile="$1"
-    local pattern="${2:-}"  # Use default value as an empty string if not provided
 
-    # Check if profile is provided
+ec2list() {
+    local profile=""
+    local pattern=""
+    local grep_color="--color=auto"
+
+    # Parse command-line options
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -p)
+                profile="$2"
+                shift 2
+                ;;
+            -g)
+                pattern="$2"
+                shift 2
+                ;;
+            *)
+                echo "Invalid option: $1" 1>&2
+                return 1
+                ;;
+        esac
+    done
+
+    # Validate profile is provided
     if [[ -z "$profile" ]]; then
-        echo "Usage: ec2list <profile> [pattern]"
+        echo "Usage: ec2list -p <profile> [-g <grep_pattern>]"
         return 1
     fi
 
     # Command to describe instances
-    local command="aws ec2 describe-instances --profile \"$profile\" --query \"Reservations[*].Instances[*].[InstanceId, InstanceType, State.Name, Tags[?Key=='Name'].Value | [0]]\" --output table"
+    local aws_command="aws ec2 describe-instances --profile \"$profile\" --query \"Reservations[*].Instances[*].[InstanceId, InstanceType, State.Name, Tags[?Key=='Name'].Value | [0]]\" --output table"
 
     # Execute command and filter by pattern if provided
     if [[ -n "$pattern" ]]; then
-        eval "$command | grep \"$pattern\""
+        # Use command substitution instead of eval
+        local result
+        result=$(bash -c "$aws_command")
+        echo "$result" | grep $grep_color "$pattern"
     else
-        eval "$command"
+        bash -c "$aws_command"
     fi
 }
 
-ssm() {
-    local profile="$1"
-    local instance_id="$2"
 
-    # Check if profile and instance_id are provided
+ssm() {
+    local profile=""
+    local instance_id=""
+
+    # Parse command-line options
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -p)
+                profile="$2"
+                shift 2
+                ;;
+            -t)
+                instance_id="$2"
+                shift 2
+                ;;
+            *)
+                echo "Invalid option: $1" 1>&2
+                return 1
+                ;;
+        esac
+    done
+
+    # Validate both profile and instance_id are provided
     if [[ -z "$profile" || -z "$instance_id" ]]; then
-        echo "Usage: ssm <profile> <instance_id>"
+        echo "Usage: ssm -p <profile> -t <instance_id>"
         return 1
     fi
 
     # Start the SSM session
     aws ssm start-session --profile "$profile" --target "$instance_id"
 }
-
 # List largest files in working directory
 lf() {
     du -h -x -s -- * | sort -r -h | head -20;
@@ -62,20 +103,6 @@ lf() {
 # Search through your history for previous run commands
 hg() {
     history | grep "$1";
-}
-
-# Create an initialise a skeleton git repository
-gitInit() {
-    if [ -z "$1" ]; then
-        printf "%s\n" "Please provide a directory name.";
-    else
-        mkdir "$1";
-        builtin cd "$1";
-        pwd;
-        git init;
-        touch README.md .gitignore LICENSE;
-        echo "# $(basename $PWD)" >> README.md
-    fi
 }
 
 export HISTSIZE=1000000
@@ -113,5 +140,3 @@ export PATH="/opt/homebrew/opt/python@3.14/libexec/bin:$PATH"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/lmarshallafzal/.lmstudio/bin"
-# End of LM Studio CLI section
-
