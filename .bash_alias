@@ -11,6 +11,7 @@ alias cd='cd -P' # Change directories, following symbolic links only once
 alias clr='clear && printf "\033[3J\033[H"' # Clear the screen and move the cursor to the top
 alias hist='history' # Write the history to a file
 alias tree='tree -C' # Show the directory tree with colors
+alias grep='grep --color=auto'
 
 alias ..='cd ..' # Change to parent directory
 alias ...='cd ../..' # Change to grandparent directory
@@ -21,3 +22,11 @@ alias pym='python3 manage.py'
 alias mkvenv='python3 -m venv venv' # Create python virtual environment
 alias startvenv='source venv/bin/activate && which python3' # Start vitual environment
 alias stopvenv='deactivate venv' # Stop virtual environment
+
+alias ewfbep='connect_instance ewf-bep'
+alias xmlbep='connect_instance xml-bep'
+alias filtuxlive1='connect_instance fil-tuxedo-live-1'
+alias filtuxstg1='connect_instance fil-tuxedo-staging-1'
+alias tux1='connect_instance frontend-tuxedo-live-1'
+alias tux2='connect_instance frontend-tuxedo-live-2'
+alias tux2='connect_instance frontend-tuxedo-live-3'

@@ -1,8 +1,5 @@
 set -o nounset
 
-export EDITOR="$VISUAL"
-export VISUAL=vim
-
 if [ -e $HOME/.bash_alias ]; then
     source $HOME/.bash_alias
 fi
@@ -23,7 +20,6 @@ HISTTIMEFORMAT="$blue%Y-%m-%d $blue%H:%M:%S $white"
 ec2list() {
     local profile=""
     local pattern=""
-    local grep_color="--color=auto"
 
     # Parse command-line options
     while [[ $# -gt 0 ]]; do
@@ -57,7 +53,7 @@ ec2list() {
         # Use command substitution instead of eval
         local result
         result=$(bash -c "$aws_command")
-        echo "$result" | grep $grep_color "$pattern"
+        echo "$result" | grep "$pattern"
     else
         bash -c "$aws_command"
     fi
@@ -95,6 +91,23 @@ ssm() {
     # Start the SSM session
     aws ssm start-session --profile "$profile" --target "$instance_id"
 }
+
+connect_instance() {
+    local INSTANCE_NAME=$1
+
+    echo "finding ewf-bep instance id..."
+    instance_id=$(ec2list -p hl -g $INSTANCE_NAME | grep "running" | awk '{print $2}')
+
+    if [ -z "$instance_id" ]; then
+        echo "error: could not find ewf-bep instance. is it running?"
+	return 1
+    fi
+
+    echo "found instance: $instance_id"
+    echo "connecting via ssm..."
+    ssm -p hl -t $instance_id
+}
+
 # List largest files in working directory
 lf() {
     du -h -x -s -- * | sort -r -h | head -20;
@@ -139,4 +152,15 @@ export PATH="/opt/homebrew/opt/python@3.14/libexec/bin:$PATH"
 
 
 # Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/lmarshallafzal/.lmstudio/bin"
+export PATH="$PATH:$HOME/.lmstudio/bin"
+export PATH="$PATH:/usr/bin/java"
+
+export VAULT_ADDR=https://vault.platform.aws.chdev.org
+
+_KDBX="$HOME/Passwords.kdbx"
+_VAULT_ENTRY="/Internet/Vault"
+
+export TF_VAR_vault_username=$(keepassxc-cli show -q --no-password -a Username "$_KDBX" "$_VAULT_ENTRY")
+export TF_VAR_vault_password=$(keepassxc-cli show -q --no-password -a Password "$_KDBX" "$_VAULT_ENTRY")
+export TF_VAR_hashicorp_vault_username=$TF_VAR_vault_username
+export TF_VAR_hashicorp_vault_password=$TF_VAR_vault_password
