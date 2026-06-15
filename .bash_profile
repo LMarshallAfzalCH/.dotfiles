@@ -94,18 +94,19 @@ ssm() {
 
 connect_instance() {
     local INSTANCE_NAME=$1
+    local PROFILE=$2
 
-    echo "finding ewf-bep instance id..."
-    instance_id=$(ec2list -p hl -g $INSTANCE_NAME | grep "running" | awk '{print $2}')
+    echo "finding $INSTANCE_NAME instance id..."
+    instance_id=$(ec2list -p $PROFILE -g $INSTANCE_NAME | grep "running" | awk '{print $2}')
 
     if [ -z "$instance_id" ]; then
-        echo "error: could not find ewf-bep instance. is it running?"
+        echo "error: could not find $INSTANCE_NAME instance. is it running?"
 	return 1
     fi
 
     echo "found instance: $instance_id"
     echo "connecting via ssm..."
-    ssm -p hl -t $instance_id
+    ssm -p $PROFILE -t $instance_id
 }
 
 # List largest files in working directory
@@ -116,6 +117,34 @@ lf() {
 # Search through your history for previous run commands
 hg() {
     history | grep "$1";
+}
+
+staging() {
+export AWS_PROFILE=staging
+export AWS_ENVIRONMENT_TAG=staging
+ssh-add ~/.ssh/ch-aws-staging.pem
+printf "\033]1337;SetBadgeFormat=%s\007" $(echo "staging" | base64)
+}
+ 
+live() {
+export AWS_PROFILE=live
+export AWS_ENVIRONMENT_TAG=live
+ssh-add ~/.ssh/ch-aws-live.pem
+printf "\033]1337;SetBadgeFormat=%s\007" $(echo "Very Live" | base64)
+}
+ 
+livesbox() {
+export AWS_PROFILE=live
+export AWS_ENVIRONMENT_TAG=live
+ssh-add ~/.ssh/ch-aws-livesbox.pem
+printf "\033]1337;SetBadgeFormat=%s\007" $(echo "Live SBox" | base64)
+}
+ 
+stagsbox() {
+export AWS_PROFILE=staging
+export AWS_ENVIRONMENT_TAG=staging
+ssh-add ~/.ssh/ch-aws-stagsbox.pem
+printf "\033]1337;SetBadgeFormat=%s\007" $(echo "Staging SBox" | base64)
 }
 
 export HISTSIZE=1000000
@@ -164,3 +193,5 @@ export TF_VAR_vault_username=$(keepassxc-cli show -q --no-password -a Username "
 export TF_VAR_vault_password=$(keepassxc-cli show -q --no-password -a Password "$_KDBX" "$_VAULT_ENTRY")
 export TF_VAR_hashicorp_vault_username=$TF_VAR_vault_username
 export TF_VAR_hashicorp_vault_password=$TF_VAR_vault_password
+
+alias assume=". assume"

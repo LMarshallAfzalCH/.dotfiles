@@ -23,10 +23,17 @@ alias mkvenv='python3 -m venv venv' # Create python virtual environment
 alias startvenv='source venv/bin/activate && which python3' # Start vitual environment
 alias stopvenv='deactivate venv' # Stop virtual environment
 
-alias ewfbep='connect_instance ewf-bep'
-alias xmlbep='connect_instance xml-bep'
-alias filtuxlive1='connect_instance fil-tuxedo-live-1'
-alias filtuxstg1='connect_instance fil-tuxedo-staging-1'
-alias tux1='connect_instance frontend-tuxedo-live-1'
-alias tux2='connect_instance frontend-tuxedo-live-2'
-alias tux2='connect_instance frontend-tuxedo-live-3'
+alias ewfbep='connect_instance ewf-bep hl'
+alias xmlbep='connect_instance xml-bep hl'
+alias chdbep='connect_intance chd-bep hl'
+
+alias filtuxlive1='connect_instance fil-tuxedo-live-1 hl'
+alias filtuxstg1='connect_instance fil-tuxedo-staging-1 hs'
+
+alias tux1='connect_instance frontend-tuxedo-live-1 hl'
+alias tux2='connect_instance frontend-tuxedo-live-2 hl'
+alias tux3='connect_instance frontend-tuxedo-live-3 hl'
+
+alias slave1='ssh -i ~/.ssh/ch-aws-live.pem ec2-user@mesos-slave1.live.aws.internal'
+alias slave2='ssh -i ~/.ssh/ch-aws-live.pem ec2-user@mesos-slave1.live.aws.internal'
+alias slave3='ssh -i ~/.ssh/ch-aws-live.pem ec2-user@mesos-slave1.live.aws.internal'
